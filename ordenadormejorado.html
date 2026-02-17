@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordenador de Números - Quick Sort</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+        input[type="number"],
+        input[type="text"],
+        select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+        .btn-info {
+            background: #2196f3;
+            color: white;
+        }
+        .btn-info:hover {
+            background: #0b7dda;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .numbers-display {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+        }
+        .number {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            background: #667eea;
+            color: white;
+            border-radius: 3px;
+            font-weight: 600;
+            min-width: 30px;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            padding: 2px;
+        }
+        .stats {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            font-weight: 600;
+            color: #555;
+            min-width: 150px;
+        }
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1em;
+            min-width: 100px;
+            text-align: right;
+        }
+        .time {
+            color: #4caf50;
+        }
+        .comparisons {
+            color: #ff9800;
+        }
+        .movements {
+            color: #f44336;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .comparison-table tr:hover {
+            background: #f5f5f5;
+        }
+        .comparison-table tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .method-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .efficiency {
+            font-weight: 600;
+        }
+        .efficiency.fast {
+            color: #4caf50;
+        }
+        .efficiency.slow {
+            color: #f44336;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeeba;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Ordenador de Números</h1>
+        <p class="subtitle">Quick Sort - El algoritmo más rápido</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="numCount">Cantidad de números:</label>
+                <input type="number" id="numCount" value="20" min="1" max="1000">
+            </div>
+            <div class="control-group">
+                <label for="maxNum">Valor máximo:</label>
+                <input type="number" id="maxNum" value="100" min="1" max="10000">
+            </div>
+            <div class="control-group">
+                <label for="numInput">O ingresa números (separados por comas):</label>
+                <input type="text" id="numInput" placeholder="ej: 5,2,8,1,9">
+            </div>
+            <div class="button-group" style="align-self: flex-end; margin-top: auto;">
+                <button class="btn-success" onclick="generateRandom()">🎲 Generar Aleatorios</button>
+                <button class="btn-info" onclick="loadCustom()">📥 Cargar Números</button>
+                <button class="btn-danger" onclick="reset()">🔄 Limpiar</button>
+            </div>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="content">
+            <div class="section">
+                <h2>📊 Quick Sort</h2>
+                <div class="numbers-display" id="quickSortDisplay">Presiona "Generar Aleatorios" para comenzar</div>
+                <div class="stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Comparaciones:</span>
+                        <span class="stat-value comparisons" id="quickComparisons">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Movimientos:</span>
+                        <span class="stat-value movements" id="quickMovements">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tiempo (ms):</span>
+                        <span class="stat-value time" id="quickTime">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Operaciones:</span>
+                        <span class="stat-value" id="quickTotal">0</span>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="sortQuickSort()" style="width: 100%; margin-top: 10px;">Ejecutar Quick Sort</button>
+            </div>
+        </div>
+
+        <table class="comparison-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Algoritmo</th>
+                    <th>Comparaciones</th>
+                    <th>Movimientos</th>
+                    <th>Tiempo (ms)</th>
+                    <th>Total Operaciones</th>
+                    <th>Eficiencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="method-name">Quick Sort</td>
+                    <td id="tableQuickComp">-</td>
+                    <td id="tableQuickMov">-</td>
+                    <td id="tableQuickTime">-</td>
+                    <td id="tableQuickTotal">-</td>
+                    <td class="efficiency"><span id="tableQuickEff">-</span></td>
+                </tr>
+                <tr>
+                    <td class="method-name">Bubble Sort</td>
+                    <td id="tableBubbleComp">-</td>
+                    <td id="tableBubbleMov">-</td>
+                    <td id="tableBubbleTime">-</td>
+                    <td id="tableBubbleTotal">-</td>
+                    <td class="efficiency"><span id="tableBubbleEff">-</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let originalArray = [];
+        let stats = {
+            quick: { comparisons: 0, movements: 0, time: 0 }
+        };
+        let isSorting = false;
+
+        // Función de espera para animar
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Generar números aleatorios
+        function generateRandom() {
+            const count = parseInt(document.getElementById('numCount').value);
+            const max = parseInt(document.getElementById('maxNum').value);
+            
+            if (count <= 0 || max <= 0) {
+                showMessage('Ingresa valores válidos', 'error');
+                return;
+            }
+            
+            originalArray = Array.from({ length: count }, () => Math.floor(Math.random() * max) + 1);
+            displayNumbers();
+            resetStats();
+            showMessage(`Se generaron ${count} números aleatorios`, 'success');
+        }
+
+        // Cargar números personalizados
+        function loadCustom() {
+            const input = document.getElementById('numInput').value.trim();
+            if (!input) {
+                showMessage('Ingresa números separados por comas', 'warning');
+                return;
+            }
+            
+            try {
+                originalArray = input.split(',').map(n => {
+                    const num = parseInt(n.trim());
+                    if (isNaN(num)) throw new Error('Número inválido');
+                    return num;
+                });
+                displayNumbers();
+                resetStats();
+                showMessage(`Se cargaron ${originalArray.length} números`, 'success');
+            } catch (e) {
+                showMessage('Error en el formato de números. Usa: 5,2,8,1,9', 'error');
+            }
+        }
+
+        // Renderizar barras con animación
+        function renderBars(arr) {
+            const maxNum = Math.max(...arr, 1);
+            const html = arr.map(n => {
+                const height = (n / maxNum) * 300;
+                return `<div class="number" style="height: ${height}px;" title="${n}">${n}</div>`;
+            }).join('');
+            document.getElementById('quickSortDisplay').innerHTML = html;
+        }
+
+        // Mostrar números en la pantalla
+        function displayNumbers() {
+            const maxNum = Math.max(...originalArray, 1);
+            const html = originalArray.map(n => {
+                const height = (n / maxNum) * 300;
+                return `<div class="number" style="height: ${height}px;" title="${n}">${n}</div>`;
+            }).join('');
+            document.getElementById('quickSortDisplay').innerHTML = html;
+        }
+
+        // Mostrar mensajes
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = text;
+            msgDiv.className = `message ${type}`;
+        }
+
+        // Quick Sort asincrónico con animación en tiempo real
+        async function quickSortAlgorithmAsync(arr, low = 0, high = arr.length - 1) {
+            if (low < high) {
+                const pi = await partitionAsync(arr, low, high);
+                await quickSortAlgorithmAsync(arr, low, pi - 1);
+                await quickSortAlgorithmAsync(arr, pi + 1, high);
+            }
+            return arr;
+        }
+
+        async function partitionAsync(arr, low, high) {
+            const pivot = arr[high];
+            let i = low - 1;
+
+            for (let j = low; j < high; j++) {
+                stats.quick.comparisons++;
+                
+                // Mostrar comparación con color
+                renderBarsWithHighlight(arr, j, -1, i + 1);
+                await sleep(40);
+                
+                if (arr[j] < pivot) {
+                    i++;
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                    stats.quick.movements++;
+                    
+                    // Mostrar movimiento
+                    renderBarsWithHighlight(arr, i, j, -1, 'moving');
+                    await sleep(40);
+                }
+            }
+            [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+            stats.quick.movements++;
+            
+            renderBars(arr);
+            await sleep(20);
+            return i + 1;
+        }
+
+        // Renderizar barras con elementos destacados
+        function renderBarsWithHighlight(arr, compare1 = -1, compare2 = -1, pivot = -1, type = 'comparing') {
+            const maxNum = Math.max(...arr, 1);
+            const html = arr.map((n, idx) => {
+                let color = '#667eea';
+                let style = '';
+                
+                if (idx === pivot) {
+                    color = '#764ba2';
+                    style = 'font-weight: bold; opacity: 0.7;';
+                } else if (idx === compare1 || idx === compare2) {
+                    if (type === 'moving') {
+                        color = '#f44336';
+                    } else {
+                        color = '#ff9800';
+                    }
+                }
+                
+                const height = (n / maxNum) * 300;
+                return `<div class="number" style="height: ${height}px; background: ${color}; ${style}" title="${n}">${n}</div>`;
+            }).join('');
+            document.getElementById('quickSortDisplay').innerHTML = html;
+        }
+
+        // Bubble Sort con conteo de operaciones
+        function bubbleSortAlgorithm(arr) {
+            const n = arr.length;
+            for (let i = 0; i < n - 1; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    stats.quick.comparisons++;
+                    if (arr[j] > arr[j + 1]) {
+                        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                        stats.quick.movements++;
+                    }
+                }
+            }
+            return arr;
+        }
+
+        // Ejecutar Quick Sort
+        async function sortQuickSort() {
+            if (originalArray.length === 0) {
+                showMessage('Primero genera o carga números', 'warning');
+                return;
+            }
+
+            if (isSorting) return;
+            isSorting = true;
+
+            stats.quick = { comparisons: 0, movements: 0, time: 0 };
+            const copy = [...originalArray];
+            
+            // Deshabilitar botón durante la animación
+            const btn = document.querySelector('button[onclick="sortQuickSort()"]');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            
+            const startTime = performance.now();
+            
+            // Ejecutar Quick Sort con animación
+            await quickSortAlgorithmAsync(copy);
+            
+            const endTime = performance.now();
+            stats.quick.time = (endTime - startTime).toFixed(3);
+            
+            // Mostrar resultado final en verde
+            const maxNum = Math.max(...copy, 1);
+            const html = copy.map(n => {
+                const height = (n / maxNum) * 300;
+                return `<div class="number" style="height: ${height}px; background: #4caf50;" title="${n}">${n}</div>`;
+            }).join('');
+            document.getElementById('quickSortDisplay').innerHTML = html;
+            
+            updateStats('quick');
+            
+            // Habilitar botón nuevamente
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            isSorting = false;
+            showMessage('¡Ordenamiento completado!', 'success');
+        }
+
+        // Ejecutar Bubble Sort
+        function sortBubbleSort() {
+            if (originalArray.length === 0) {
+                showMessage('Primero genera o carga números', 'warning');
+                return;
+            }
+
+            stats.quick = { comparisons: 0, movements: 0, time: 0 };
+            const copy = [...originalArray];
+            
+            const startTime = performance.now();
+            bubbleSortAlgorithm(copy);
+            const endTime = performance.now();
+            
+            stats.quick.time = (endTime - startTime).toFixed(3);
+            
+            displaySortedQuick(copy);
+            updateStats('quick');
+        }
+
+        // Mostrar Quick Sort ordenado
+        function displaySortedQuick(arr) {
+            const maxNum = Math.max(...arr, 1);
+            const html = arr.map(n => {
+                const height = (n / maxNum) * 300;
+                return `<div class="number" style="height: ${height}px; background: #4caf50;" title="${n}">${n}</div>`;
+            }).join('');
+            document.getElementById('quickSortDisplay').innerHTML = html;
+        }
+
+        // Actualizar estadísticas
+        function updateStats(type) {
+            const s = stats[type];
+            const total = s.comparisons + s.movements;
+            
+            document.getElementById(`${type}Comparisons`).textContent = s.comparisons.toLocaleString();
+            document.getElementById(`${type}Movements`).textContent = s.movements.toLocaleString();
+            document.getElementById(`${type}Time`).textContent = s.time;
+            document.getElementById(`${type}Total`).textContent = total.toLocaleString();
+        }
+
+        // Actualizar tabla de comparación
+        function updateTable() {
+            // Función no utilizada
+        }
+
+        // Resetear estadísticas
+        function resetStats() {
+            stats = {
+                quick: { comparisons: 0, movements: 0, time: 0 }
+            };
+            
+            document.getElementById('quickComparisons').textContent = '0';
+            document.getElementById('quickMovements').textContent = '0';
+            document.getElementById('quickTime').textContent = '0';
+            document.getElementById('quickTotal').textContent = '0';
+        }
+
+        // Limpiar todo
+        function reset() {
+            originalArray = [];
+            document.getElementById('numInput').value = '';
+            document.getElementById('quickSortDisplay').innerHTML = 'Presiona "Generar Aleatorios" para comenzar';
+            resetStats();
+            document.getElementById('message').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
